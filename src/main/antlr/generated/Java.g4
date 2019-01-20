@@ -17,6 +17,10 @@ IF:             'if';
 ELSE:           'else';
 SUPER:          'super';
 WHILE:          'while';
+NEW:            'new';
+
+L_SQ_PAREN:     '[';
+R_SQ_PAREN:     ']';
 
 fragment INT:            'int';
 fragment BYTE:           'byte';
@@ -29,7 +33,13 @@ PRIMITIVE_TYPE: INT | BYTE | LONG | FLOAT | DOUBLE | BOOLEAN;
 fragment Letter: [a-zA-Z];
 IDENTIFIER:     Letter (Letter | [0-9$_])*;
 
-LITERAL:        ([0-9]+) | '"'.*?'"';
+
+fragment NULL:      'null';
+LITERAL:        NULL | ([0-9]+) | '"'.*?'"';
+
+
+BINARY_OP:       '+' | '-' | '*' | '/' | '^' | '&' | '|' | '==' | '!=' | '>' | '<' | '>=' | '<=' | '&&' | '||';
+NOT:            '!';
 
 type: IDENTIFIER | PRIMITIVE_TYPE;
 
@@ -39,7 +49,7 @@ classDeclaration: ACCESS_MOD? FINAL? CLASS IDENTIFIER (EXTENDS type)? (IMPLEMENT
 
 classBody: (field | constructor | function)*;
 
-field: ACCESS_MOD? FINAL? type IDENTIFIER ';';
+field: ACCESS_MOD? FINAL? type (L_SQ_PAREN R_SQ_PAREN)* IDENTIFIER ';';
 
 function: ACCESS_MOD? FINAL? type IDENTIFIER '(' argumentList ')' '{' functionBody '}';
 
@@ -47,7 +57,7 @@ argument: FINAL? type IDENTIFIER;
 
 argumentList: (argument (',' argument)*)?;
 
-functionParam: IDENTIFIER | LITERAL | functionCall | classFunctionCall;
+functionParam: expression;
 
 functionParamList: (functionParam (',' functionParam)*)?;
 
@@ -55,13 +65,17 @@ functionCall: IDENTIFIER '(' functionParamList ')';
 
 classFunctionCall: IDENTIFIER '.' functionCall ('.' functionCall)*;
 
-anyFunctionCall: functionCall | classFunctionCall;
+elemFunctionCall:   IDENTIFIER (L_SQ_PAREN expression R_SQ_PAREN)+;
 
-assigment: IDENTIFIER '=' (LITERAL | IDENTIFIER | anyFunctionCall);
+anyFunctionCall: functionCall | classFunctionCall | elemFunctionCall;
 
-localVariable: FINAL? type IDENTIFIER;
+assigment: IDENTIFIER '=' (expression | newStatement);
 
-condition: anyFunctionCall | IDENTIFIER;
+newStatement: NEW type ((L_SQ_PAREN expression R_SQ_PAREN)* | '(' functionParamList ')');
+
+localVariable: FINAL? type (L_SQ_PAREN R_SQ_PAREN)* IDENTIFIER;
+
+condition: expression;
 
 ifStatement: IF '(' condition ')' '{' functionBody '}' (ELSE '{' functionBody '}')?;
 
@@ -77,5 +91,11 @@ constructor: IDENTIFIER '(' argumentList ')' '{' constructorBody '}';
 
 constructorBody: (SUPER '(' functionParamList ')' ';')? functionBody;
 
-
-
+expression
+    : expression BINARY_OP expression
+    | NOT expression
+    | '(' expression ')'
+    | IDENTIFIER
+    | LITERAL
+    | anyFunctionCall
+    ;

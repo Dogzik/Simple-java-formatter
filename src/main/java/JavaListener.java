@@ -115,20 +115,15 @@ public class JavaListener {
             writer.write(final_mod.getText() + " ");
         }
         writeType(ctx.type());
+        ctx.L_SQ_PAREN().forEach(leftParen -> {
+            writer.write(leftParen.getText() + "]");
+        });
         writer.write(" " + ctx.IDENTIFIER().getText() + ";");
     }
 
 
     private void writeFunctionParam(JavaParser.FunctionParamContext ctx) {
-        if (ctx.IDENTIFIER() != null) {
-            writer.write(ctx.IDENTIFIER().getText());
-        } else if (ctx.LITERAL() != null) {
-            writer.write(ctx.LITERAL().getText());
-        } else if (ctx.functionCall() != null) {
-            writeFunctionCall(ctx.functionCall());
-        } else {
-            writeClassFunctionCall(ctx.classFunctionCall());
-        }
+        writeExpression(ctx.expression());
     }
 
     private void writeFunctionParamList(JavaParser.FunctionParamListContext ctx) {
@@ -156,23 +151,47 @@ public class JavaListener {
         });
     }
 
-    private void writeAnyFunctionalCall(JavaParser.AnyFunctionCallContext ctx) {
+    private void writeElemFunctionCall(JavaParser.ElemFunctionCallContext ctx) {
+        writer.write(ctx.IDENTIFIER().getText());
+        ctx.expression().forEach(expression -> {
+            writer.write("[");
+            writeExpression(expression);
+            writer.write("]");
+        });
+    }
+
+    private void writeAnyFunctionCall(JavaParser.AnyFunctionCallContext ctx) {
         if (ctx.functionCall() != null) {
             writeFunctionCall(ctx.functionCall());
+        } else if (ctx.elemFunctionCall() != null) {
+            writeElemFunctionCall(ctx.elemFunctionCall());
         } else {
             writeClassFunctionCall(ctx.classFunctionCall());
         }
     }
 
-    private void writeAssigment(JavaParser.AssigmentContext ctx) {
-        List<TerminalNode> ids = ctx.IDENTIFIER();
-        writer.write(ids.get(0).getText() + " = ");
-        if (ctx.LITERAL() != null) {
-            writer.write(ctx.LITERAL().getText());
-        } else if (ctx.anyFunctionCall() != null) {
-            writeAnyFunctionalCall(ctx.anyFunctionCall());
+    private void writeNewStatement(JavaParser.NewStatementContext ctx) {
+        writer.write(ctx.NEW().getText() + " ");
+        writeType(ctx.type());
+        if (ctx.functionParamList() != null) {
+            writer.write("(");
+            writeFunctionParamList(ctx.functionParamList());
+            writer.write(")");
         } else {
-            writer.write(ids.get(1).getText());
+            ctx.expression().forEach(expression -> {
+                writer.write("[");
+                writeExpression(expression);
+                writer.write("]");
+            });
+        }
+    }
+
+    private void writeAssigment(JavaParser.AssigmentContext ctx) {
+        writer.write(ctx.IDENTIFIER().getText() + " = ");
+        if (ctx.expression() != null) {
+            writeExpression(ctx.expression());
+        } else {
+            writeNewStatement(ctx.newStatement());
         }
     }
 
@@ -181,16 +200,36 @@ public class JavaListener {
             writer.write(ctx.FINAL().getText() + " ");
         }
         writeType(ctx.type());
+        ctx.L_SQ_PAREN().forEach(leftParen -> {
+            writer.write(leftParen.getText() + "]");
+        });
         writer.write(" " + ctx.IDENTIFIER());
     }
 
 
-    private void writeCondition(JavaParser.ConditionContext ctx) {
-        if (ctx.anyFunctionCall() != null) {
-            writeAnyFunctionalCall(ctx.anyFunctionCall());
-        } else {
+    private void writeExpression(JavaParser.ExpressionContext ctx) {
+        if (ctx.IDENTIFIER() != null) {
             writer.write(ctx.IDENTIFIER().getText());
+        } else if (ctx.LITERAL() != null) {
+            writer.write(ctx.LITERAL().getText());
+        } else if (ctx.anyFunctionCall()!= null) {
+            writeAnyFunctionCall(ctx.anyFunctionCall());
+        } else if (ctx.NOT() != null) {
+            writer.write(ctx.NOT().getText());
+            writeExpression(ctx.expression(0));
+        } else if (ctx.BINARY_OP() != null) {
+            writeExpression(ctx.expression(0));
+            writer.write(" " + ctx.BINARY_OP().getText() + " ");
+            writeExpression(ctx.expression(1));
+        } else {
+            writer.write("(");
+            writeExpression(ctx.expression(0));
+            writer.write(")");
         }
+    }
+
+    private void writeCondition(JavaParser.ConditionContext ctx) {
+        writeExpression(ctx.expression());
     }
 
     private void writeIfStatement(JavaParser.IfStatementContext ctx) {
@@ -227,13 +266,21 @@ public class JavaListener {
         writer.write("}");
     }
 
+    private int f(int x) {
+        return 2 + x;
+    }
+
+    private int g(int x) {
+        return 3 + x;
+    }
+
     private void writeStatement(JavaParser.StatementContext ctx) {
         if (ctx.localVariable() != null) {
             writeLocalVariable(ctx.localVariable());
         } else if (ctx.assigment() != null) {
             writeAssigment(ctx.assigment());
         } else {
-            writeAnyFunctionalCall(ctx.anyFunctionCall());
+            writeAnyFunctionCall(ctx.anyFunctionCall());
         }
         writer.write(";");
     }
