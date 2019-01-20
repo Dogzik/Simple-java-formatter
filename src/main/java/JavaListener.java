@@ -212,7 +212,7 @@ public class JavaListener {
             writer.write(ctx.IDENTIFIER().getText());
         } else if (ctx.LITERAL() != null) {
             writer.write(ctx.LITERAL().getText());
-        } else if (ctx.anyFunctionCall()!= null) {
+        } else if (ctx.anyFunctionCall() != null) {
             writeAnyFunctionCall(ctx.anyFunctionCall());
         } else if (ctx.NOT() != null) {
             writer.write(ctx.NOT().getText());

@@ -8,9 +8,12 @@ import java.nio.file.Paths;
 
 public class Formatter {
     public static void main(String[] args) {
-        Path input = Paths.get(args[0]);
-        Path output = Paths.get(args[1]);
+        if (args.length != 2) {
+            System.err.println("Expected 2 arguments: <input_file> <output_file>");
+        }
         try {
+            Path input = Paths.get(args[0]);
+            Path output = Paths.get(args[1]);
             JavaLexer lexer = new JavaLexer(CharStreams.fromPath(input));
             JavaParser parser = new JavaParser(new CommonTokenStream(lexer));
             JavaListener listener = new JavaListener(output);
