@@ -18,6 +18,9 @@ ELSE:           'else';
 SUPER:          'super';
 WHILE:          'while';
 NEW:            'new';
+RETURN:         'return';
+BREAK:          'break';
+CONTINUE:       'continue';
 
 L_SQ_PAREN:     '[';
 R_SQ_PAREN:     ']';
@@ -81,9 +84,9 @@ ifStatement: IF '(' condition ')' '{' functionBody '}' (ELSE '{' functionBody '}
 
 whileStatement: WHILE '(' condition ')' '{' functionBody '}';
 
-statement: (localVariable | assigment | anyFunctionCall) ';';
+statement: (localVariable | assigment | anyFunctionCall | BREAK | CONTINUE) ';';
 
-composedStatement: ifStatement | whileStatement | statement;
+composedStatement: ifStatement | whileStatement | statement | (RETURN expression ';');
 
 functionBody: composedStatement*;
 

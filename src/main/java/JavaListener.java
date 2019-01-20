@@ -279,6 +279,10 @@ public class JavaListener {
             writeLocalVariable(ctx.localVariable());
         } else if (ctx.assigment() != null) {
             writeAssigment(ctx.assigment());
+        } else if (ctx.BREAK() != null) {
+            writer.write(ctx.BREAK().getText());
+        } else if (ctx.CONTINUE() != null) {
+            writer.write(ctx.CONTINUE().getText());
         } else {
             writeAnyFunctionCall(ctx.anyFunctionCall());
         }
@@ -290,6 +294,10 @@ public class JavaListener {
             writeStatement(ctx.statement());
         } else if (ctx.whileStatement() != null) {
             writeWhileStatement(ctx.whileStatement());
+        } else if (ctx.RETURN() != null) {
+            writer.write(ctx.RETURN().getText() + " ");
+            writeExpression(ctx.expression());
+            writer.write(";");
         } else {
             writeIfStatement(ctx.ifStatement());
         }
