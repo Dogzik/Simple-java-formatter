@@ -2,51 +2,80 @@ grammar Java;
 
 WHITESPACE:     [ \t\r\n\u000C]+ -> skip;
 
-PUBLIC:         'public';
-PRIVATE:        'private';
-PROTECTED:      'protected';
+fragment PUBLIC:         'public';
+fragment PRIVATE:        'private';
+fragment PROTECTED:      'protected';
 
 ACCESS_MOD: PUBLIC | PRIVATE | PROTECTED;
 
 CLASS:          'class';
-INTERFACE:      'interface';
 
 IMPLEMENTS:     'implements';
 EXTENDS:        'extends';
+FINAL:          'final';
+IF:             'if';
+ELSE:           'else';
+SUPER:          'super';
+WHILE:          'while';
 
-INT:            'int';
-BYTE:           'byte';
-LONG:           'long';
-FLOAT:          'float';
-DOUBLE:         'double';
-BOOLEAN:        'boolean';
-
-fragment Letter: [a-zA-Z];
-
-IDENTIFIER:     Letter (Letter | [0-9$_])*;
-
+fragment INT:            'int';
+fragment BYTE:           'byte';
+fragment LONG:           'long';
+fragment FLOAT:          'float';
+fragment DOUBLE:         'double';
+fragment BOOLEAN:        'boolean';
 PRIMITIVE_TYPE: INT | BYTE | LONG | FLOAT | DOUBLE | BOOLEAN;
 
-type
-    : IDENTIFIER
-    | PRIMITIVE_TYPE
-    ;
+fragment Letter: [a-zA-Z];
+IDENTIFIER:     Letter (Letter | [0-9$_])*;
+
+LITERAL:        ([0-9]+) | '"'.*?'"';
+
+type: IDENTIFIER | PRIMITIVE_TYPE;
 
 typeList : type (',' type)*;
 
-classDeclaration: PUBLIC? IDENTIFIER (EXTENDS type)? (IMPLEMENTS typeList)? '{' classBody '}';
+classDeclaration: ACCESS_MOD? FINAL? CLASS IDENTIFIER (EXTENDS type)? (IMPLEMENTS typeList)? '{' classBody '}';
 
-classBody: field* function*;
+classBody: (field | constructor | function)*;
 
-field: ACCESS_MOD? type IDENTIFIER ';';
+field: ACCESS_MOD? FINAL? type IDENTIFIER ';';
 
-function: ACCESS_MOD? type IDENTIFIER '(' argument*')' '{' /*functionBody*/ '}';
+function: ACCESS_MOD? FINAL? type IDENTIFIER '(' argumentList ')' '{' functionBody '}';
 
-argument: type IDENTIFIER;
+argument: FINAL? type IDENTIFIER;
 
+argumentList: (argument (',' argument)*)?;
 
+functionParam: IDENTIFIER | LITERAL | functionCall | classFunctionCall;
 
+functionParamList: (functionParam (',' functionParam)*)?;
 
+functionCall: IDENTIFIER '(' functionParamList ')';
+
+classFunctionCall: IDENTIFIER '.' functionCall ('.' functionCall)*;
+
+anyFunctionCall: functionCall | classFunctionCall;
+
+assigment: IDENTIFIER '=' (LITERAL | IDENTIFIER | anyFunctionCall);
+
+localVariable: FINAL? type IDENTIFIER;
+
+condition: anyFunctionCall | IDENTIFIER;
+
+ifStatement: IF '(' condition ')' '{' functionBody '}' (ELSE '{' functionBody '}')?;
+
+whileStatement: WHILE '(' condition ')' '{' functionBody '}';
+
+statement: (localVariable | assigment | anyFunctionCall) ';';
+
+composedStatement: ifStatement | whileStatement | statement;
+
+functionBody: composedStatement*;
+
+constructor: IDENTIFIER '(' argumentList ')' '{' constructorBody '}';
+
+constructorBody: (SUPER '(' functionParamList ')' ';')? functionBody;
 
 
 

@@ -14,7 +14,7 @@ dependencies {
 
 generateGrammarSource {
     maxHeapSize = "64m"
-    arguments += ['-package', 'generated']
+    arguments += ['-no-visitor', '-no-listener', '-package', 'generated']
     //outputDirectory = new File("src/main/antlr/sources")
 }
 
