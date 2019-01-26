@@ -17,6 +17,51 @@ public class TestClass
         ttt = new Inetegr(a, "222", c(g(x)));
         a = new int[1][2][3];
         ggg = Lolol.q(123, "aaaa", tt);
+        for
+
+
+
+
+
+
+
+        (a =                                        1338; g(a
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        , 3)!= 2517;a=a+f(a + 2)){print("lol kek");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        }
         if (  (x[4][444] + 7)
 
          != (f(g(t)) + 228) && (67 >= 22) || !        ((y | 5 & 8) == 33)  ) {

@@ -21,6 +21,7 @@ NEW:            'new';
 RETURN:         'return';
 BREAK:          'break';
 CONTINUE:       'continue';
+FOR:            'for';
 
 L_SQ_PAREN:     '[';
 R_SQ_PAREN:     ']';
@@ -84,9 +85,11 @@ ifStatement: IF '(' condition ')' '{' functionBody '}' (ELSE '{' functionBody '}
 
 whileStatement: WHILE '(' condition ')' '{' functionBody '}';
 
+forStatement : FOR '(' assigment ';' condition ';' assigment ')' '{' functionBody '}';
+
 statement: (localVariable | assigment | anyFunctionCall | BREAK | CONTINUE) ';';
 
-composedStatement: ifStatement | whileStatement | statement | (RETURN expression ';');
+composedStatement: forStatement | ifStatement | whileStatement | statement | (RETURN expression ';');
 
 functionBody: composedStatement*;
 

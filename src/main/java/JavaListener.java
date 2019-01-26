@@ -266,12 +266,20 @@ public class JavaListener {
         writer.write("}");
     }
 
-    private int f(int x) {
-        return 2 + x;
-    }
-
-    private int g(int x) {
-        return 3 + x;
+    private void writeForStatement(JavaParser.ForStatementContext ctx) {
+        writer.write(ctx.FOR() + " (");
+        writeAssigment(ctx.assigment(0));
+        writer.write("; ");
+        writeCondition(ctx.condition());
+        writer.write("; ");
+        writeAssigment(ctx.assigment(1));
+        writer.write(") {");
+        ++depth;
+        writeFunctionBody(ctx.functionBody());
+        --depth;
+        writer.write("\n");
+        writeTabs();
+        writer.write("}");
     }
 
     private void writeStatement(JavaParser.StatementContext ctx) {
@@ -294,6 +302,8 @@ public class JavaListener {
             writeStatement(ctx.statement());
         } else if (ctx.whileStatement() != null) {
             writeWhileStatement(ctx.whileStatement());
+        } else if (ctx.forStatement() != null){
+            writeForStatement(ctx.forStatement());
         } else if (ctx.RETURN() != null) {
             writer.write(ctx.RETURN().getText() + " ");
             writeExpression(ctx.expression());
